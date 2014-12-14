@@ -1,0 +1,18 @@
+<style>
+  #wrapper { position: relative; }
+  #ui {
+    left: 0;
+    position: absolute;
+    top: 0;
+    z-index:1;
+  }
+</style>
+<div id="wrapper">
+<canvas id="canvas"></canvas>
+<div>
+<button onclick="nextGameState();draw();return false;">Advance to next state</button>
+<button onclick="start();return false;">Start Game</button>
+<button onclick="stop();return false;">Stop Game</button>
+</div>
+</div>
+<script src="hu.js"></script>
