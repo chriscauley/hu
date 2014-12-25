@@ -6,13 +6,26 @@
     top: 0;
     z-index:1;
   }
+  [id^=auto] { float:right; }
+  .swatch { display: inline-block; width: 20px; height: 20px; }
 </style>
 <div id="wrapper">
 <canvas id="canvas"></canvas>
 <div>
-<button onclick="nextGameState();draw();return false;">Advance to next state</button>
-<button onclick="start();return false;">Start Game</button>
-<button onclick="stop();return false;">Stop Game</button>
+  <button onclick="update_numbers();game.tick();return false;">Advance to next state</button>
+  <button onclick="game.zoomIn();return false;">Zoom In</button>
+  <button onclick="game.zoomOut();return false;">Zoom Out</button>
+  <button onclick="return false;" id="autox2">AUTO x2!</button>
+  <button onclick="return false;" id="auto">AUTO!</button>
 </div>
+<div>
+  <label for="b_numbers">Neighbors for Birth</label>
+  <input type="text" id="b_numbers" value="3"/>
 </div>
-<script src="hu.js"></script>
+<div>
+  <label for="s_numbers">Neighbors for Survival</label>
+  <input type="text" id="s_numbers" value="2,3"/>
+</div>
+<div id="mspf"></div>
+<div id="fps"></div>
+<script src="hu2.js"></script>
