@@ -1,0 +1,45 @@
+<!-- from http://rest-term.com/labs/html5/fft.html-->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" type="text/css" href="jquery-ui.min.css">
+<title>HTML5 Spatial Frequency Filtering using 2D-FFT</title>
+<style>h1{font-family:"Century",serif;border-left:4px solid #00aa66;padding-left:8px;}a{color:#00aa66;}#Filter{margin:10px 0 10px 10px;}#Filter .ui-state-default{color:#00aa66;}#Filter .ui-state-hover{color:#00cc66;}#Filter .ui-state-active{color:#ffffff;}#Slider{width:300px;margin:10px 0 10px 10px;}#Slider .ui-slider-handle{border-color:#00aa66;}</style>
+</head>
+<body>
+<article>
+<header>
+<h1>Spatial Frequency Filtering using 2D-FFT</h1>
+</header>
+<div class="wrap"><img src="1600.png" width="1600" height="1600">
+<canvas id="Spectrum" width="1600" height="1600"></canvas>
+<canvas id="Result" width="1600" height="1600"></canvas>
+</div>
+<div>
+<div id="Filter">
+<input type="radio" id="HPF" name="filter" value="HPF" checked="checked"/>
+<label for="HPF">Highpass</label>
+<input type="radio" id="LPF" name="filter" value="LPF"/>
+<label for="LPF">Lowpass</label>
+</div>
+<div id="Slider"></div>
+<div id="ViewType">
+<label>スペクトル対数表示(logarithmic display)&emsp;on</label>
+<input type="radio" name="view" value="0" checked="checked"/>
+<label>off</label>
+<input type="radio" name="view" value="1"/>
+</div>
+</div>
+<footer>
+<a href="http://rest-term.com/labs/html5/index.html" title="index">index</a>
+</footer>
+</article>
+<script src="../js/utils.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery-ui.min.js"></script>
+<script src="js/fft.js"></script>
+<script src="js/fft-client.js"></script>
+</body>
+</html>

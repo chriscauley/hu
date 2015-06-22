@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+<title>HTML5 Image Processing (Convolution Filter)</title>
+<script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-4840440-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+</head>
+<body>
+<article>
+<header>
+<h1 class="term">Convolution Filter</h1>
+</header>
+<div class="wrap"><img src="../images/IrishLandscapes.jpg" id="img1">
+<canvas id="Canvas"></canvas>
+</div>
+<div>
+<select id="SelectBox">
+<option value="blur" selected>blur</option>
+<option value="gaussian">guass</option>
+<option value="sharpness">sharp</option>
+<option value="edge">edge</option>
+<option value="emboss">emboss</option>
+</select>
+<button id="Button">apply filter</button>
+</div>
+<footer>
+</footer>
+</article>
+<script src="../js/utils.js"></script>
+<script src="cavin.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', function(e) {
+  var canvas = document.querySelector('#Canvas');
+  var img = document.querySelector('#img1');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  var context = document.querySelector('#Canvas').getContext('2d');
+  var btn = document.querySelector('#Button');
+  var sb = document.querySelector('#SelectBox');
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+
+  Cavin.get({
+    path: '../images/IrishLandscapes.jpg',
+    success: function(data) {
+      var kernel = [],
+          divisor = 1,
+          bias = 0;
+      btn.addEventListener('click', function(e) {
+        try {
+          switch(sb.value) {
+          case 'blur':
+            kernel = [1, 1, 1,
+                      1, 1, 1,
+                      1, 1, 1];
+            divisor = 9;
+            break;
+          case 'gaussian':
+            var sigma = 0.849321800288,
+                k = 1.0/Math.sqrt(2.0*Math.PI)/sigma,
+                sum = 0.0, f = 0;
+            kernel = [];
+            for(var y=-1; y<=1; y++) {
+              for(var x=-1; x<=1; x++) {
+                f = k*Math.exp(-(x*x + y*y)/(2*sigma*sigma));
+                kernel.push(f);
+                sum += f;
+              }
+            }
+            for(var i=0; i<kernel.length; i++) {
+              kernel[i] /= sum;
+            }
+            divisor = 1;
+            break;
+          case 'sharpness':
+            kernel = [0,  0,  0,  0,  0,
+                      0, -1, -1, -1,  0,
+                      0, -1,  9, -1,  0,
+                      0, -1, -1, -1,  0,
+                      0,  0,  0,  0,  0];
+            divisor = 1;
+            break;
+          case 'edge':
+            kernel = [-1, -1, -1,
+                      -1,  8, -1,
+                      -1, -1, -1];
+            divisor = 1;
+            break;
+          case 'emboss':
+            kernel = [-2, -1, 0,
+                      -1,  1, 1,
+                      0,  1, 2];
+            divisor = 1;
+            break;
+          default:
+            break;
+          }
+          var rv = Cavin.Filter.convolution(data, kernel, divisor, bias);
+          Cavin.put(rv, context);
+        } catch(e) {
+          alert(e);
+        }
+      }, false); // end btn
+    },
+    error: function(message) {
+      alert(message);
+    },
+  });  // end Cavin
+}, false); // end window
+    </script>
+</body>
+</html>

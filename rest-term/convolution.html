@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+<title>HTML5 Image Processing (Convolution Filter)</title>
+<script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-4840440-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+</head>
+<body>
+<article>
+<header>
+<h1 class="term">Convolution Filter</h1>
+</header>
+<div class="wrap"><img src="lena.jpg" width="256" height="256">
+<canvas id="Canvas" width="256" height="256"></canvas>
+</div>
+<div>
+<select id="SelectBox">
+<option value="blur" selected>ぼかし</option>
+<option value="gaussian">ぼかし (ガウシアン)</option>
+<option value="sharpness">シャープ</option>
+<option value="edge">エッジ検出</option>
+<option value="emboss">エンボス</option>
+</select>
+<button id="Button">apply filter</button>
+<p>HTML5 Canvas で簡単な画像処理 (畳み込みフィルタ) を行います。<br/>
+Firefox3.6, Safari5.0, Chrome10.0, Opera11.60で動作確認済み。</p>
+</div>
+<footer>
+<a href="./index.html" title="index">index</a>
+</footer>
+</article>
+<script src="js/cavin.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', function(e) {
+  var context = document.querySelector('#Canvas').getContext('2d');
+  var btn = document.querySelector('#Button');
+  var sb = document.querySelector('#SelectBox');
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+
+  Cavin.get({
+    path: 'lena.jpg',
+    success: function(data) {
+      var kernel = [],
+          divisor = 1,
+          bias = 0;
+      btn.addEventListener('click', function(e) {
+        try {
+          switch(sb.value) {
+          case 'blur':
+            kernel = [1, 1, 1,
+                      1, 1, 1,
+                      1, 1, 1];
+            divisor = 9;
+            break;
+          case 'gaussian':
+            var sigma = 0.849321800288,
+                k = 1.0/Math.sqrt(2.0*Math.PI)/sigma,
+                sum = 0.0, f = 0;
+            kernel = [];
+            for(var y=-1; y<=1; y++) {
+              for(var x=-1; x<=1; x++) {
+                f = k*Math.exp(-(x*x + y*y)/(2*sigma*sigma));
+                kernel.push(f);
+                sum += f;
+              }
+            }
+            for(var i=0; i<kernel.length; i++) {
+              kernel[i] /= sum;
+            }
+            divisor = 1;
+            break;
+          case 'sharpness':
+            kernel = [-1, -1, -1,
+                      -1,  9, -1,
+                      -1, -1, -1];
+            divisor = 1;
+            break;
+          case 'edge':
+            kernel = [-1, -1, -1,
+                      -1,  8, -1,
+                      -1, -1, -1];
+            divisor = 1;
+            break;
+          case 'emboss':
+            kernel = [-2, -1, 0,
+                      -1,  1, 1,
+                      0,  1, 2];
+            divisor = 1;
+            break;
+          default:
+            break;
+          }
+          var rv = Cavin.Filter.convolution(data, kernel, divisor, bias);
+          Cavin.put(rv, context);
+        } catch(e) {
+          alert(e);
+        }
+      }, false); // end btn
+    },
+    error: function(message) {
+      alert(message);
+    },
+  });  // end Cavin
+}, false); // end window
+    </script>
+</body>
+</html>

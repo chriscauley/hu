@@ -2,6 +2,7 @@
 <html>
   <head>
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+    <script src="js/utils.js"></script>
     <script src="js/filters.js"></script>
   </head>
   <body>
@@ -10,9 +11,7 @@
         <h1>Spatial Frequency Filtering using 2D-FFT</h1>
       </header>
       <div class="wrap">
-        <img src="images/lena_gray.jpg" width="256" height="256" onload="Filters.sharpen(this)">
-
-        <canvas id="Result" width="256" height="256"></canvas>
+        <img src="images/IrishLandscapes.jpg" id="lena" onload="init()">
       </div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>

@@ -1,15 +1,16 @@
 Filters = {};
+var SCALE = 1;
 Filters.getPixels = function(img) {
   var c = this.getCanvas(img.width, img.height);
   var ctx = c.getContext('2d');
-  ctx.drawImage(img,0,0);
+  ctx.drawImage(img,0,0,c.width, c.height);
   return ctx.getImageData(0,0,c.width,c.height);
 };
 
 Filters.getCanvas = function(w,h) {
   var c = document.createElement('canvas');
-  c.width = w;
-  c.height = h;
+  c.width = w*SCALE;
+  c.height = h*SCALE;
   return c;
 };
 
@@ -20,15 +21,39 @@ Filters.createImageData = function(w,h) {
   return this.tmpCtx.createImageData(w,h);
 };
 
-Filters.filterImage = function(filter, image, var_args) {
-  var args = [this.getPixels(image)];
-  for (var i=2; i<arguments.length; i++) {
-    args.push(arguments[i]);
+Filters.monochrome = timeit(function monochrome(pixels,cutoff) {
+  var i=pixels.width*pixels.height*4;
+  while (i--) {
+    pixels.data[i] = (pixels.data[i]>cutoff)?255:0;
   }
-  return filter.apply(null, args);
-};
+  return pixels
+});
 
-Filters.convolute = function(pixels, weights, opaque) {
+Filters.grayscale = timeit(function grayscale(pixels) {
+  var d = pixels.data;
+  for (var i=0; i<d.length; i+=4) {
+    var r = d[i];
+    var g = d[i+1];
+    var b = d[i+2];
+    // CIE luminance for the RGB
+    // The human eye is bad at seeing red and blue, so we de-emphasize them.
+    var v = 0.2126*r + 0.7152*g + 0.0722*b;
+    d[i] = d[i+1] = d[i+2] = v
+  }
+  return pixels;
+});
+
+Filters.conway = timeit(function conway(pixels,old_pixels) {
+  var i=pixels.width*pixels.height*4;
+  while (i--) {
+    if (old_pixels.data[i] == 0) {
+      pixels.data[i] = (pixels.data[i] == 0);
+    }
+  }
+  return pixels
+})
+
+Filters.convolute = timeit(function convolute(pixels, weights, opaque) {
   var side = Math.round(Math.sqrt(weights.length));
   var halfSide = Math.floor(side/2);
   var src = pixels.data;
@@ -70,15 +95,12 @@ Filters.convolute = function(pixels, weights, opaque) {
     }
   }
   return output;
-};
+});
 
-Filters.sharpen = function (image) {
-  var _k = [ 1/9,1/9,1/9,
-             1/9,1/9,1/9,
-             1/9,1/9,1/9];
-  var _k = [ 0,  -1,  0,
-             -1,  5, -1,
-             0,  -1,  0 ];
+/*
+  var _conway = [ 1/9,1/9,1/9,
+                  1/9,1/9,1/9,
+                  1/9,1/9,1/9];
   var _k = [ 0,   0.25 ,   0,
              0.25,   0, 0.25,
              0,   0.25,    0 ];
@@ -89,11 +111,40 @@ Filters.sharpen = function (image) {
              B, A, 0, A, B,
              A, B, A, B, A,
              0, A, B, A, 0];
-  var idata = Filters.filterImage(Filters.convolute, image, _k);
-  var c = document.createElement('canvas');
-  document.body.appendChild(c);
-  c.width = idata.width;
-  c.height = idata.height;
-  var ctx = c.getContext('2d');
-  ctx.putImageData(idata, 0, 0);
+*/
+
+var CON_KEYS = {
+  blur: [ 1/9, 1/9, 1/9,
+          1/9, 1/9, 1/9,
+          1/9, 1/9, 1/9 ],
+  sharpen: [ 0,  -1,  0,
+             -1,  5, -1,
+             0,  -1,  0 ],
 }
+
+var step = timeit(function step() {
+  var c = document.getElementById("output_canvas");
+  var ctx = c.getContext("2d");
+  var idata = ctx.getImageData(0,0,c.width,c.height);
+  idata = Filters.convolute(idata,CON_KEYS.blur);
+  ctx.putImageData(idata,0,0);
+});
+
+var game_state;
+
+var init = function init() {
+  var img = document.getElementById('lena');
+  var img_pixels = Filters.getPixels(img);
+  
+  c = document.createElement('canvas');
+  c.id = "output_canvas";
+  document.body.appendChild(c);
+  c.width = img_pixels.width;
+  c.height = img_pixels.height;
+  game_state = new Array(img_pixels.data.length);
+  var ctx = c.getContext('2d');
+  img_pixels = Filters.convolute(img_pixels,CON_KEYS.sharpen);
+  //img_pixels = Filters.grayscale(img_pixels);
+  //img_pixels = Filters.monochrome(img_pixels,100);
+  ctx.putImageData(img_pixels, 0, 0);
+};
